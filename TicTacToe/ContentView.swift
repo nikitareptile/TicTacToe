@@ -31,8 +31,9 @@ struct ContentView: View {
                             .padding(.bottom, 6.6)
                         Image(systemName: moves[index]?.indicator ?? "")
                             .resizable()
-                            .frame(width: 40, height: 42)
+                            .frame(width: 40, height: 40)
                             .foregroundColor(.white)
+                            .padding(.bottom, 6.6)
                     }
                     .onTapGesture {
                         if isCircleOccupied(in: moves, forIndex: index) { return }
@@ -48,6 +49,15 @@ struct ContentView: View {
     
     func isCircleOccupied(in moves: [Move?], forIndex index: Int) -> Bool {
         return moves.contains(where: {$0?.boardIndex == index})
+    }
+    
+    func determineComputerMovePosition(in moves: [Move?]) -> Int {
+        var movePosition = Int.random(in: 0..<9)
+        
+        while isCircleOccupied(in: moves, forIndex: movePosition) {
+            movePosition = Int.random(in: 0..<9)
+        }
+        return movePosition
     }
 }
 
