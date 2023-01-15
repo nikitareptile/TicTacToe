@@ -18,7 +18,7 @@ struct ContentView: View {
                                    GridItem(.flexible())]
     
     @State private var moves: [Move?] = Array(repeating: nil, count: 9)
-    @State private var isHumanTurn = true
+    @State private var isBoardDisabled = false
     
     var body: some View {
         VStack {
@@ -37,13 +37,21 @@ struct ContentView: View {
                     }
                     .onTapGesture {
                         if isCircleOccupied(in: moves, forIndex: index) { return }
-                        moves[index] = Move(player: isHumanTurn ? .human : .computer, boardIndex: index)
-                        isHumanTurn.toggle()
+                        moves[index] = Move(player: .human, boardIndex: index)
+                        isBoardDisabled.toggle()
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            let computerPosition = determineComputerMovePosition(in: moves)
+                            moves[computerPosition] = Move(player: .computer, boardIndex: computerPosition)
+                            isBoardDisabled.toggle()
+                        }
+                        
                     }
                 }
             }
             Spacer()
         }
+        .disabled(isBoardDisabled)
         .padding()
     }
     
