@@ -19,6 +19,7 @@ struct ContentView: View {
     
     @State private var moves: [Move?] = Array(repeating: nil, count: 9)
     @State private var isBoardDisabled = false
+    @State private var alertItem: AlertItem?
     
     var body: some View {
         VStack {
@@ -38,17 +39,18 @@ struct ContentView: View {
                     .onTapGesture {
                         if isCircleOccupied(in: moves, forIndex: index) { return }
                         moves[index] = Move(player: .human, boardIndex: index)
-                        isBoardDisabled.toggle()
                         
                         if checkWinCondition(for: .human, in: moves) {
-                            print("Human")
+                            alertItem = AlertContext.humanWin
                             return
                         }
                         
                         if checkForDraw(in: moves) {
-                            print("It's a draw")
+                            alertItem = AlertContext.draw
                             return
                         }
+                        
+                        isBoardDisabled.toggle()
                         
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             let computerPosition = determineComputerMovePosition(in: moves)
@@ -56,12 +58,12 @@ struct ContentView: View {
                             isBoardDisabled.toggle()
                             
                             if checkWinCondition(for: .computer, in: moves) {
-                                print("Computer")
+                                alertItem = AlertContext.computerWin
                                 return
                             }
                             
                             if checkForDraw(in: moves) {
-                                print("It's a draw")
+                                alertItem = AlertContext.draw
                                 return
                             }
                         }
@@ -73,6 +75,11 @@ struct ContentView: View {
         }
         .disabled(isBoardDisabled)
         .padding()
+        .alert(item: $alertItem, content: { alertItem in
+            Alert(title: alertItem.title,
+                  message: alertItem.message,
+                  dismissButton: .default(alertItem.buttonTitle, action: { resetGame() }))
+        })
     }
     
     func isCircleOccupied(in moves: [Move?], forIndex index: Int) -> Bool {
@@ -101,6 +108,10 @@ struct ContentView: View {
     
     func checkForDraw(in moves: [Move?]) -> Bool {
         return moves.compactMap { $0 }.count == 9
+    }
+    
+    func resetGame() {
+        moves = Array(repeating: nil, count: 9)
     }
 }
 
